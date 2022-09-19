@@ -1,9 +1,8 @@
 import { Chat } from '../../schema'
 import './style.scss'
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import React from 'react'
 import { Button, TextField } from '@mui/material'
-// import { makeStyles } from '@mui/material'
 
 
 interface lProps {
@@ -11,22 +10,8 @@ interface lProps {
     addMessage: (message: string, author: string, id: string) => void;
 }
 
-
-// const useStyles = makeStyles({
-//     root: {
-//         display: "flex",
-//         flexDirection: "column",
-//         maxWidth: "350px",
-//         margin: "10px"
-//     },
-//     edit: {
-//         marginBottom: "10px"
-//     }
-// })
-
 export const Message: React.FC<lProps> = ({messages, addMessage}) => {
     const inputRef = useRef(null);
-    // const classes = useStyles();
     const [message, setMessage] = useState('');
     const [author, setAuthor] = useState('Guest');
 
@@ -45,7 +30,10 @@ export const Message: React.FC<lProps> = ({messages, addMessage}) => {
 
     const formSubmit = (event: React.BaseSyntheticEvent) => {
         event.preventDefault();
-        // addMessage(message, author, id);
+        addMessage(author, message, '1');
+        setMessage('');
+        // @ts-ignore
+        inputRef.current.focus();
     }
 
     return (
