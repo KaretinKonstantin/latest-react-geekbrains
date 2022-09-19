@@ -5,7 +5,11 @@ import {ChatList} from "../ChatList";
 import {NoChat} from "../NoChat";
 import {ChatsL} from '../../schema'
 import { Message } from '../MessageList/Message'
-
+import {shallowEqual, useDispatch, useSelector} from "react-redux";
+import {getChatMessages} from "../../store/messages/selectors";
+import {addMessage} from "../../store/messages/actions";
+import {addChat, deleteChat} from "../../store/chats/actions";
+import {getChats} from "../../store/chats/selectors";
 
 const initChats: ChatsL = {
     chat1: [

@@ -1,27 +1,71 @@
 import {Link} from "react-router-dom";
 import './style.scss';
-import { List } from '@mui/material'
-import { ListItem } from '@mui/material'
-import React from 'react'
+import {List, ListItem, Button, Dialog, DialogTitle, TextField} from '@mui/material'
+import React, { BaseSyntheticEvent, useState } from 'react'
 import { ChatsL } from '../../schema'
 
 interface IProps{
     chats: ChatsL
 }
 
-export const ChatList: React.FC<IProps> = ({chats}) => {
-    const chatList = Object.keys(chats);
+export const ChatList: React.FC<IProps> = ({chats, onDeleteChat, onAddChat}) => {
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [newChatName, setNewChatName] = useState('');
+    const chatsList = Object.keys(chats);
+
+    const handleDelete = (id: any) => {
+        if (typeof onDeleteChat === 'function') {
+            onDeleteChat(id);
+        }
+    }
+
+    const handleAdd = () => {
+        if (typeof onAddChat === 'function') {
+            onAddChat(newChatName);
+        }
+        setNewChatName('');
+        handleClose();
+    }
+
+    const handleChange = (e:BaseSyntheticEvent) => setNewChatName(e.target.value);
+
+
+    const handleOpen = () => setDialogVisible(true);
+    const handleClose = () => setDialogVisible(false);
+
+
+
     return (
-        <div className="chat-container">
-            <List>
-                {chatList.map((item, index) => {
-                    return (
-                        <ListItem key={index}>
-                            <Link to={`/chats/${item}`}>{item}</Link>
-                        </ListItem>
+        <>
+            <div className="chat-container">
+                <button type="button"
+                        className="chat-button chat-button--add"
+                        onClick={handleOpen}>
+                    Добавить чат
+                </button>
+                <List>
+                    {chatsList.map(item => {
+                            return (
+                                <ListItem key={item}>
+                                    <Link to={`/chats/${item}`}>{ chats[item] }</Link>
+                                    <button type="button"
+                                            className="chat-button chat-button--del"
+                                            onClick={() => handleDelete(item)}>
+                                        Удалить
+                                    </button>
+                                </ListItem>
+                            )
+                        }
                     )}
-                )}
-            </List>
-        </div>
+                </List>
+            </div>
+            <Dialog open={dialogVisible} onClose={handleClose} >
+                <DialogTitle>Please enter a name for new chat</DialogTitle>
+                <TextField value={newChatName} onChange={handleChange} />
+                <Button onClick={handleAdd} disabled={!newChatName}>
+                    Добавить
+                </Button>
+            </Dialog>
+        </>
     )
 }
