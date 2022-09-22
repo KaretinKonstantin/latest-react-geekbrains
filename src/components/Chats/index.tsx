@@ -5,7 +5,11 @@ import {ChatList} from "../ChatList";
 import {NoChat} from "../NoChat";
 import {ChatsL} from '../../schema'
 import { Message } from '../MessageList/Message'
-
+import {shallowEqual, useDispatch, useSelector} from "react-redux";
+import {getChatMessages} from "../../store/messages/selectors";
+import { addMessageWithReply} from "../../store/messages/actions";
+import {addChat, deleteChat} from "../../store/chats/actions";
+import {getChats} from "../../store/chats/selectors";
 
 const initChats: ChatsL = {
     chat1: [
@@ -35,54 +39,38 @@ const initChats: ChatsL = {
 }
 
 export const Chats = () => {
-    const [chats, setChats] = useState(initChats);
-    const {chatId} = useParams()
-    //TODO отловить где не прилетает парам
-    console.log(chatId)
+    const {chatId} = useParams();
+    const dispatch = useDispatch();
+    const chats = useSelector(getChats);
+    const getMessages = useMemo(() => getChatMessages(chatId), [chatId]);
+    const messages = useSelector(getMessages, shallowEqual);
 
-    const addMessage = useCallback((author: string, message: string, id: string) => {
-        if (!id && chatId) id = chatId;
-        setChats(prevState => ({
-            ...prevState,
-            [id]: [
-                ...prevState[id],
-                {
-                    id: prevState[id].length + 1,
-                    author,
-                    message
-                }
-            ]
-        }))
-    }, [chatId]);
+    const sendMessage = useCallback(
+        (author, message) => {
+            dispatch(addMessageWithReply(chatId, message, author));
+        }, [dispatch, chatId]
+    )
 
-    const botMessage = useCallback(() => {
-        const messages = chatId ? chats[chatId] : '';
-        if (!messages) return ;
+    const handleDeleteChat = (id) => {
+        dispatch(deleteChat(id));
+    }
 
-        if (messages.length > 0
-            && messages[messages.length - 1].author !== 'Bot') {
-            const timerId = setTimeout(() => {
-                addMessage('Bot', 'Сообщение отправлено', chatId ?? 'id');
-            }, 1500)
-            return () => {
-                clearTimeout(timerId);
-            }
-        }
-    }, [chats, chatId, addMessage]);
-
-    useEffect(() => {
-        botMessage();
-    }, [botMessage, chats]);
+    const handleAddChat = (name) => {
+        dispatch(addChat(name))
+    }
 
     return (
         <Fragment>
             <Link to="/">Home</Link>
             <h1>Chats</h1>
             <div className="chats-container">
-                <ChatList chats={chats}/>
-                {chatId}
-                {(chatId ? chats[chatId] : '') && <Message messages={(chatId ? chats[chatId] : [])} addMessage={addMessage}/>}
-                {(chatId ? !chats[chatId] : '') && <NoChat/>}
+                <ChatList chats={chats}
+                          onDeleteChat={handleDeleteChat}
+                          onAddChat={handleAddChat}/>
+                {chats[chatId] ?
+                    <Message messages={messages}
+                                 addMessage={sendMessage}/>
+                    : <NoChat/>}
             </div>
         </Fragment>
     )
