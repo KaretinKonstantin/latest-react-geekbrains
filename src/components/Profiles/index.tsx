@@ -2,7 +2,6 @@ import { BaseSyntheticEvent, Fragment } from 'react'
 import {Link} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {toggleAction} from "../../store/profile/actions";
-import { RootState } from '../../store'
 
 export const Profiles = () => {
     const active = useSelector((state: RootState) => state.active);
